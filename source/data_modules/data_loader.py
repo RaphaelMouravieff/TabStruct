@@ -33,9 +33,7 @@ def load_datasets(data_args, model_args, logger):
         if model_args=="PT":
             datasets = load_from_disk(data_args.train_file)
 
-    logger.info("datasets",datasets)
-
-    
+    logger.info("datasets",datasets)    
     return datasets
 
 
