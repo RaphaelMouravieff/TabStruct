@@ -22,8 +22,6 @@ def load_config(data_args, model_args, logger ):
         revision=model_args.model_revision,
         early_stopping = False,
         no_repeat_ngram_size = 0,
-        use_auth_token=True if model_args.use_auth_token else None,
-        token=model_args.token,
     )
 
     model_args.ignore_mismatched_sizes = False
@@ -75,9 +73,7 @@ def load_tokenizer(model_args, logger = None):
             cache_dir=model_args.cache_dir,
             use_fast=model_args.use_fast_tokenizer,
             revision=model_args.model_revision,
-            use_auth_token=True if model_args.use_auth_token else None,
-            add_prefix_space=True,
-            token=model_args.token)
+            add_prefix_space=True,)
 
     if logger is not None:
         logger.info(f"tokenizer : {tokenizer}")     
@@ -97,8 +93,7 @@ def load_model(model_args, config, logger):
         model = TabStructForConditionalGeneration.from_pretrained(
             model_args.model_name_or_path, 
             config=config, 
-            ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
-            token=model_args.token)
+            ignore_mismatched_sizes=model_args.ignore_mismatched_sizes)
 
         logger.info(f'Loaded TabStruct from checkpoint: {model_args.model_name_or_path}')
         if not model_args.is_inference  and not "checkpoint" in model_args.model_name_or_path.split('/')[-1]:
@@ -114,8 +109,7 @@ def load_extra_weights(model, model_args, config, logger):
     model2 = BartForConditionalGeneration.from_pretrained(
         model_args.model_name_or_path, 
         config=config, 
-        ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
-        token=model_args.token)
+        ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,)
     
     if model_args.positional_embedding in ["TPE", "CPE"]:
         model.model.encoder.embed_positions.embed_positions.weight = model2.model.encoder.embed_positions.weight
@@ -124,7 +118,7 @@ def load_extra_weights(model, model_args, config, logger):
     del model2
 
     # Load Tapas segment embeddings
-    model2 = TapasModel.from_pretrained(model_args.tapas_path, token=model_args.token)
+    model2 = TapasModel.from_pretrained(model_args.tapas_path)
 
     model.model.encoder.embed_positions.segment_embedding.weight = model2.embeddings.token_type_embeddings_0.weight
     logger.info('Loaded extra weights for Segment Embedding')

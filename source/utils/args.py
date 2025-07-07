@@ -8,11 +8,6 @@ class ModelArguments:
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
     """
 
-    token: str = field(
-        metadata={"help": "hf token."},
-        default="",
-    )
-
     is_jz: str = field(
         metadata={"help": "Using Jean-zay (remove)."},
         default=False,
