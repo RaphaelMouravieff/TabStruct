@@ -48,13 +48,6 @@ def check_parameters(model_args, data_args, training_args, logger):
     assert model_args.positional_embedding in ["TPE", "CPE"], \
         "tabular_structure_embedding must be either 'TPE' or 'CPE'"
     
-    if data_args.training_type == "pre-training":
-        assert model_args.input_token_structure in data_args.dataset_name, \
-            f"If tabular_structure_embedding is '{model_args.input_token_structure}', you should use a tokenized dataset for pre-training. (use training_type = 'pre-training-tokenize')"
-        
-    assert data_args.max_query_length + data_args.max_labels_length ==  data_args.max_target_length, \
-        f"max_query_length ({data_args.max_query_length}) + max_labels_length ({data_args.max_labels_length}) ==  max_target_length ({data_args.max_target_length})"
-
     if model_args.mask_sparsity_level in ["M4","M5","M6"]:
         assert model_args.input_token_structure == "T2", \
             "input_token_structure must be 'T2' when mask_sparsity_level is 'M4', 'M5', 'M6'"
@@ -76,3 +69,12 @@ def check_parameters(model_args, data_args, training_args, logger):
             "When attention_type is 'flex', mask_sparsity_level must be 'M3'."
         assert model_args.encoding_structure_bias == "B0", \
             "encoding_structure_bias must be False when using 'flex' attention, as bias is not supported"
+        
+
+    if "large" in model_args.model_name_or_path:
+        assert "large" in model_args.tapas_path, \
+            "When a large model is used, tapas_path should also be a large model"
+
+    if "base" in model_args.model_name_or_path:
+        assert "base" in model_args.tapas_path, \
+            "When a base model is used, tapas_path should also be a base model"

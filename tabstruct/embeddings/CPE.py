@@ -20,6 +20,7 @@ class CellsPositionalEmbedding(torch.nn.Embedding):
         super().__init__(self.num_embeddings + self.offset, self.embedding_dim)
 
     def forward(self, input_ids: torch.Tensor, token_type):
+
         """`input_ids' shape is expected to be [bsz x seqlen]."""
 
         _, seq_len = input_ids.shape[:2]

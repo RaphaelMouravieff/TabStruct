@@ -1,23 +1,19 @@
 
+import torch
 
-from transformers import  set_seed
 from tabstruct.utils.paths import  get_max_checkpoint
-
 from tabstruct.models.model_setup import load_config, load_tokenizer, load_model
 from tabstruct.data_modules.data_loader import load_datasets
 from tabstruct.data_modules.preprocessing import preprocess_datasets
-from tabstruct.data_modules.data_collator import CustomDataCollatorForSeq2Seq
 from tabstruct.metrics.base_metric import compute_metrics
-from tabstruct.bin.training import setup_trainer, run_evaluation, run_prediction, run_evaluation2
+from tabstruct.bin.training import setup_trainer, run_evaluation, run_prediction
 
 from functools import partial
 
-import os 
+from transformers import (DataCollatorForSeq2Seq, set_seed)
 from datasets import DatasetDict
-import sys
-import json
-import torch
 
+import json
 import os
 
 
@@ -60,7 +56,7 @@ def main_inference_real_data(model_args, data_args, training_args, logger):
         
         with open(file_path_validation, 'r') as f:
             data = json.load(f)
-        logger.info(f"Resukts checkoints {model_args.task}:\n {data}")
+        logger.info(f"Results checkoints {model_args.task}:\n {data}")
 
 
         with open(file_path_test, 'r') as f:
@@ -99,8 +95,7 @@ def run_test(tokenizer, model_args, data_args, training_args, logger, device, sa
 
         
 
-    data_collator = CustomDataCollatorForSeq2Seq(
-            data_args.training_type,
+    data_collator = DataCollatorForSeq2Seq(
             tokenizer,
             model=model,
             label_pad_token_id=-100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id,
@@ -113,16 +108,9 @@ def run_test(tokenizer, model_args, data_args, training_args, logger, device, sa
     trainer = setup_trainer(model, training_args, dataset_test, dataset_test, tokenizer, data_collator, compute_metrics_)
     
 
-
-    if model_args.question_in_decoder:
-        logger.info("*** Evaluate for question in decoder***")
-        history  = run_evaluation2(model, training_args, data_args, dataset_test, tokenizer, data_collator, compute_metrics_)
-        metrics = {"predict_denotation_accuracy": history["eval_denotation_accuracy"], "predict_loss": history["eval_loss"]}
-
-    if not model_args.question_in_decoder:
-        logger.info("*** Evaluate ***")
-        trainer = setup_trainer(model, training_args, dataset_test, dataset_test, tokenizer, data_collator, compute_metrics_)
-        metrics  = run_prediction(trainer, data_args, dataset_test)
+    logger.info("*** Evaluate ***")
+    trainer = setup_trainer(model, training_args, dataset_test, dataset_test, tokenizer, data_collator, compute_metrics_)
+    metrics  = run_prediction(trainer, data_args, dataset_test)
 
 
     accuracy = metrics['predict_denotation_accuracy']
@@ -165,7 +153,7 @@ def run_validation(tokenizer, model_args, data_args, training_args, logger, devi
         model = load_model(model_args, config, logger)
         model.to(device)
 
-        data_collator = CustomDataCollatorForSeq2Seq(
+        data_collator = DataCollatorForSeq2Seq(
                 data_args.training_type,
                 tokenizer,
                 model=model,
@@ -175,16 +163,10 @@ def run_validation(tokenizer, model_args, data_args, training_args, logger, devi
         compute_metrics_ = partial(compute_metrics, tokenizer=tokenizer, data_args=data_args)
 
         
-        if model_args.question_in_decoder:
-            logger.info("*** Evaluate for question in decoder***")
-            history  = run_evaluation2(model, training_args, data_args, dataset_eval, tokenizer, data_collator, compute_metrics_)
-
-
-        if not model_args.question_in_decoder:
-            logger.info("*** Evaluate ***")
-            trainer = setup_trainer(model, training_args, dataset_eval, dataset_eval, tokenizer, data_collator, compute_metrics_)
-            run_evaluation(trainer, data_args, dataset_eval)
-            history = trainer.state.log_history[0]
+        logger.info("*** Evaluate ***")
+        trainer = setup_trainer(model, training_args, dataset_eval, dataset_eval, tokenizer, data_collator, compute_metrics_)
+        run_evaluation(trainer, data_args, dataset_eval)
+        history = trainer.state.log_history[0]
             
         logger.info(f"history : {history}")
         accuracy = history["eval_denotation_accuracy"]

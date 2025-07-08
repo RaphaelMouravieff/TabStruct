@@ -1,12 +1,8 @@
 import torch
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple
 
-from torch.nn.attention.flex_attention import (create_block_mask,
-                                               flex_attention,)
-from transformers.models.bart.modeling_bart import  (BartAttention)
-
-SLIDING_WINDOW = 1024
-
+from torch.nn.attention.flex_attention import flex_attention
+from transformers.models.bart.modeling_bart import BartAttention
 
 
 

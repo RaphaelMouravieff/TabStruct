@@ -96,12 +96,6 @@ class TabStructForConditionalGeneration(BartPreTrainedModel):
                     labels, self.config.pad_token_id, self.config.decoder_start_token_id
                 )
 
-        #print('input_ids',input_ids.size())
-        #print('attention_mask',attention_mask.size())
-        #print('token_type',token_type.size())
-        #print('decoder_input_ids',decoder_input_ids.size())
-
-
         outputs = self.model(
             input_ids,
             attention_mask=attention_mask,
@@ -126,13 +120,10 @@ class TabStructForConditionalGeneration(BartPreTrainedModel):
 
         masked_lm_loss = None
         if labels is not None:
-            #print('labels is not None')
-            #print(labels)
+           
             labels = labels.to(lm_logits.device)
             loss_fct = CrossEntropyLoss()
-            #print(f"lm_logits.size() : {lm_logits.size()}")
-            #print(f"lm_logits.view(-1, self.config.vocab_size).size() : {lm_logits.view(-1, self.config.vocab_size).size()}")
-            #print(f"labels.view(-1).size() {labels.view(-1).size()}")
+        
             masked_lm_loss = loss_fct(lm_logits.view(-1, self.config.vocab_size), labels.view(-1))
 
         if not return_dict:
@@ -164,10 +155,9 @@ class TabStructForConditionalGeneration(BartPreTrainedModel):
         encoder_outputs=None,
         **kwargs,
     ): 
-        #print("Prepare inputs for generation")
+
         # cut decoder_input_ids if past_key_values is used
         if past_key_values is not None:
-            #print('oui past_key_values', past_key_values[0][0].size())
 
             past_length = past_key_values[0][0].shape[2]
 

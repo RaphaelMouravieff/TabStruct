@@ -1,17 +1,15 @@
 #!/bin/bash
 
 # --- Locate current script and repo base ---
-echo "BASH_SOURCE: $BASH_SOURCE"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-BASE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-echo "SCRIPT_DIR: $SCRIPT_DIR"
+BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo "BASE_DIR: $BASE_DIR"
 tasks=("ALL")
 mapfile -t all_models < "$BASE_DIR/all_models.txt"
 
 generate_job() {
-  cat <<EOF > $BASE_DIR/jobs/train/$2/job.sh
+  cat <<EOF > $BASE_DIR/jobs/train/$2/synthetic.sh
 #!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --job-name=v$3
@@ -27,8 +25,8 @@ python $BASE_DIR/run.py \\
   --tokenizer_name facebook/bart-base \\
   --do_train \\
   --do_eval \\
-  --train_file "$BASE_DIR/data/dataset_and_json/train/train_${tasks[$1]}.json" \\
-  --validation_file "$BASE_DIR/data/dataset_and_json/train/valid_${tasks[$1]}.json"  \\
+  --train_file "$BASE_DIR/data/train/train_synthetic_tiny.json" \\
+  --validation_file "$BASE_DIR/data/train/valid_synthetic_tiny.json"  \\
   --output_dir $BASE_DIR/models/$2/${tasks[$1]} \\
   --per_device_train_batch_size 8 \\
   --gradient_accumulation_steps 1 \\
@@ -42,12 +40,10 @@ python $BASE_DIR/run.py \\
   --num_beams 5 \\
   --weight_decay 1e-2 \\
   --label_smoothing_factor 0.1 \\
-  --max_steps 1000000 \\
-  --max_query_length 41 \\
-  --max_labels_length 87 \\
+  --max_steps 500000 \\
   --max_target_length 128 \\
   --max_source_length 512 \\
-  --logging_dir "$BASE_DIR/logs/train/$2/${tasks[$1]}" \\
+  --logging_dir $BASE_DIR/logs/train/$2/${tasks[$1]} \\
   --logging_steps 50 \\
   --overwrite_output_dir 1 \\
   --overwrite_cache 1 \\
@@ -64,11 +60,11 @@ for task in "${tasks[@]}"; do
   for name in "${all_models[@]}"; do
 
     mkdir -p $BASE_DIR/jobs/train/$name/results
-    echo "Generated job for: $name count: $index"
+    echo "Synthetic train job for: $name count: $index"
     generate_job $task $name $index
 
     if [ "$1" == "true" ]; then
-      sbatch $BASE_DIR/jobs/train/$name/job.sh
+      sbatch $BASE_DIR/jobs/train/$name/synthetic.sh
     fi
     ((index++))
   done

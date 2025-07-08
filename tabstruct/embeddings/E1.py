@@ -15,11 +15,8 @@ class RowColumnEmbeddings(nn.Module):
 
     def forward(self, token_type_ids=None):
 
-        # Add the embeddings for row and column
         embeddings  = self.token_type_embeddings_1(token_type_ids[:, :, 1])
         embeddings += self.token_type_embeddings_2(token_type_ids[:, :, 2])
-
-
 
         return embeddings
     

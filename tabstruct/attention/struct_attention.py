@@ -3,143 +3,11 @@ from tabstruct.attention.bias_utils import get_relative_relation_ids
 from torch import nn
 import torch
 
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 
 from transformers import BartConfig
 
-
-import math
-
-class RelationAwareBias(nn.Module):
-    def __init__(self, d_model, num_heads, num_relations, rank=4):
-        super().__init__()
-        self.d_model = d_model
-        self.num_heads = num_heads
-        self.num_relations = num_relations
-        self.rank = rank
-        self.head_dim = d_model // num_heads
-
-        # Relation-specific low-rank LoRA-style adapters for Q and K
-        # Changer l'initialization 
-        self.q_proj_A = nn.Parameter(torch.randn(num_relations, num_heads, self.rank, self.head_dim))
-        self.q_proj_B = nn.Parameter(torch.randn(num_relations, num_heads, self.head_dim, self.rank))
-
-        self.k_proj_A = nn.Parameter(torch.randn(num_relations, num_heads, self.rank, self.head_dim))
-        self.k_proj_B = nn.Parameter(torch.randn(num_relations, num_heads, self.head_dim, self.rank))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        for param in [self.q_proj_A, self.q_proj_B, self.k_proj_A, self.k_proj_B]:
-            nn.init.zeros_(param)
-
-
-
-    def forward(self, Q, K, relation_ids):
-        B, H, L, D = Q.shape
-        R = self.num_relations
-        X = self.rank
-
-        Q_proj = torch.einsum("rhdx,bhld->brhlx", self.q_proj_B, Q)  # (B, R, H, L, X)
-        Q_adapted = torch.einsum("rhxd,brhlx->brhld", self.q_proj_A, Q_proj)  # (B, R, H, L, D)
-
-        # Project K
-        K_proj = torch.einsum("rhdx,bhld->brhlx", self.k_proj_B, K)
-        K_adapted = torch.einsum("rhxd,brhlx->brhld", self.k_proj_A, K_proj)
-
-        scores = torch.einsum("brhld,brhmd->brhlm", Q_adapted, K_adapted)  # (B, R, H, L, L)
-        scores = scores.permute(0, 2, 1, 3, 4)  # (B, H, R, L, L)
-
-        # Gather the correct relation scores
-        relation_ids_exp = relation_ids.long().unsqueeze(1).expand(-1, H, -1, -1)
-        bias = torch.gather(scores, dim=2, index=relation_ids_exp.unsqueeze(2)).squeeze(2)  # (B, H, L, L)
-                
-        return bias
-
-
-"""class RelationAwareStructureMatrix(nn.Module):
-    def __init__(self, num_heads, num_relations, seq_len, head_dim, rank=4):
-        super().__init__()
-        self.num_heads = num_heads
-        self.num_relations = num_relations
-        self.seq_len = seq_len
-        self.head_dim = head_dim
-        self.rank = rank
-
-        # Low-rank factors for A = I + A1 @ A2
-        self.A1 = nn.Parameter(torch.zeros(num_relations, num_heads, head_dim, rank))
-        self.A2 = nn.Parameter(torch.zeros(num_relations, num_heads, rank, head_dim))
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        nn.init.zeros_(self.A1)
-        nn.init.zeros_(self.A2)
-
-    def forward(self, Q, K, relation_ids):
-
-        B, H, L, D = Q.size()
-        R = self.num_relations
-
-        # Precompute A_r = I + A1 @ A2 for all relations and heads
-        A_rel = torch.matmul(self.A1, self.A2)  # (R, H, D, D)
-        identity = torch.eye(D, device=Q.device).unsqueeze(0).unsqueeze(0)  # (1, 1, D, D)
-        A_rel = A_rel + identity  # (R, H, D, D)
-
-        # Now we gather A matrices per (i,j) from relation_ids
-        # Output shape: (B, H, L, L, D, D)
-        rel_ids_exp = relation_ids.unsqueeze(1).expand(-1, H, -1, -1)  # (B, H, L, L)
-        A = A_rel[rel_ids_exp]  # gather (B, H, L, L, D, D)
-
-        # Apply QAKᵀ
-        Q_exp = Q.unsqueeze(3)  # (B, H, L, 1, D)
-        K_exp = K.unsqueeze(2)  # (B, H, 1, L, D)
-
-        # Compute Q @ A: (B, H, L, L, D)
-        QA = torch.matmul(Q_exp, A).squeeze(3)  # (B, H, L, L, D)
-        attn_scores = torch.einsum('bhlmd,bhlnd->bhlmn', QA, K_exp)  # (B, H, L, L)
-
-        return attn_scores"""
-    
-
-class RelationAwareStructureMatrix(nn.Module):
-    def __init__(self, num_heads, num_relations, head_dim, rank=4):
-        super().__init__()
-        self.num_heads = num_heads
-        self.num_relations = num_relations
-        self.head_dim = head_dim
-        self.rank = rank
-
-        self.A1 = nn.Parameter(torch.zeros(num_relations, num_heads, head_dim, rank))
-        self.A2 = nn.Parameter(torch.zeros(num_relations, num_heads, rank, head_dim))
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        nn.init.zeros_(self.A1)
-        nn.init.zeros_(self.A2)
-
-    def forward(self, Q, K, relation_ids):
-        """
-        Q, K: (B, H, L, D)
-        relation_ids: (B, L, L)
-        """
-        B, H, L, D = Q.size()
-        attn_scores = torch.zeros(B, H, L, L, device=Q.device, dtype=Q.dtype)
-
-        identity = torch.eye(D, device=Q.device).unsqueeze(0).unsqueeze(0)  # (1, 1, D, D)
-        A_matrices = self.A1 @ self.A2 + identity  # (R, H, D, D)
-
-        for r in range(self.num_relations):
-            A_r = A_matrices[r]  # (H, D, D)
-            QA = torch.einsum('bhld,hde->bhle', Q, A_r)  # (B, H, L, D)
-            scores_r = torch.einsum('bhld,bhmd->bhlm', QA, K)  # (B, H, L, L)
-
-            # Create a mask where relation_ids == r
-            rel_mask = (relation_ids == r).unsqueeze(1)  # (B, 1, L, L)
-            attn_scores = attn_scores + scores_r * rel_mask
-
-        return attn_scores  # (B, H, L, L)
 
 
 class StructAttention(nn.Module):
@@ -181,20 +49,6 @@ class StructAttention(nn.Module):
         if self.encoding_structure_bias == "B1":
             self.attention_bias_embeddings = nn.Embedding(13 + 1, 1)
 
-        if self.encoding_structure_bias == "B2":
-            self.relation_bias_module = RelationAwareBias(
-                d_model=self.embed_dim,
-                num_heads=self.num_heads,
-                num_relations=13,  # match output of get_relative_relation_ids
-                rank=4,           )
-
-        if self.encoding_structure_bias == "B3":
-            self.relation_bias_module = RelationAwareStructureMatrix(
-                num_heads=self.num_heads,
-                num_relations=13,
-                head_dim=self.head_dim,
-                rank=4,
-            )
 
     def _shape(self, tensor: torch.Tensor, seq_len: int, bsz: int):
         return tensor.view(bsz, seq_len, self.num_heads, self.head_dim).transpose(1, 2).contiguous()
@@ -267,14 +121,13 @@ class StructAttention(nn.Module):
 
         src_len = key_states.size(1)
         
-        if self.encoding_structure_bias != "B3":
-            attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
+        attn_weights = torch.bmm(query_states, key_states.transpose(1, 2))
 
-            if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
-                raise ValueError(
-                    f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
-                    f" {attn_weights.size()}"
-                )
+        if attn_weights.size() != (bsz * self.num_heads, tgt_len, src_len):
+            raise ValueError(
+                f"Attention weights should be of size {(bsz * self.num_heads, tgt_len, src_len)}, but is"
+                f" {attn_weights.size()}"
+            )
 
         if attention_mask is not None:
             
@@ -283,30 +136,15 @@ class StructAttention(nn.Module):
                     f"Attention mask should be of size {(bsz, 1, tgt_len, src_len)}, but is {attention_mask.size()}"
                 )
             
-            if self.encoding_structure_bias != "B3":
-                attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask
+
+            attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + attention_mask
 
             if self.encoding_structure_bias == "B1":
-                    
+
                 attention_bias_ids = get_relative_relation_ids(token_type, attention_mask)
                 attention_bias = self.attention_bias_embeddings(attention_bias_ids).squeeze(-1).unsqueeze(1)
                 attention_bias = attention_bias.expand(-1, self.num_heads, -1, -1)
                 attn_weights = attn_weights + attention_bias
-
-            if self.encoding_structure_bias == "B2":
-                # Compute relation-aware attention bias
-                attention_bias_ids = get_relative_relation_ids(token_type, attention_mask)  # (B, L, L)
-                # Reshape Q, K for bias module (B, num_heads, L, head_dim)
-                Q = query_states.view(bsz, self.num_heads, tgt_len, self.head_dim)
-                K = key_states.view(bsz, self.num_heads, src_len, self.head_dim)
-                structure_bias = self.relation_bias_module(Q, K, attention_bias_ids)  # (B, num_heads, L, L)
-                attn_weights = attn_weights.view(bsz, self.num_heads, tgt_len, src_len) + structure_bias
-
-            if self.encoding_structure_bias == "B3":
-                attention_bias_ids = get_relative_relation_ids(token_type, attention_mask)  # (B, L, L)
-                Q = query_states.view(bsz, self.num_heads, tgt_len, self.head_dim)
-                K = key_states.view(bsz, self.num_heads, src_len, self.head_dim)
-                attn_weights = self.relation_bias_module(Q, K, attention_bias_ids)  # (B, H, L, L)
 
             attn_weights = attn_weights.view(bsz * self.num_heads, tgt_len, src_len)
 

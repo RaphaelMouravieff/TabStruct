@@ -2,7 +2,6 @@ import pandas as pd
 import random
 import re
 
-
 def show_example(datasets, mode, logger):
     logger.info("\n\n\n*** Random train example ***\n\n\n")
     rnd = random.randint(0, len(datasets[mode])) -1
@@ -29,3 +28,4 @@ def decode_example(example, tokenizer):
     labels = tokenizer.decode(labels).strip()
         
     return df, query, labels
+

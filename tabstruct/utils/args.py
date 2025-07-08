@@ -7,26 +7,19 @@ class ModelArguments:
     """
     Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
     """
-
-    is_inference: bool = field(
-        metadata={"help": "is inference ?."},
-        default=True,
+    encoding_type: str = field(
+        metadata={"help": "model name"},
     )
 
-    mask_query_table: int = field(
-        metadata={"help": "if 1, masks attention between query and table."},
-        default=0,
+    task: str = field(
+        metadata={"help": "train or test"},
     )
 
     attention_type: str = field(
-        metadata={"help": "sdpa, flex or flash"},
+        metadata={"help": "sdpa or flex"},
         default="sdpa",
     )
-    
-    encoding_type: str = field(
-        metadata={"help": "For debug."},
-        default=None,
-    )
+
     input_token_structure: str = field(
         metadata={"help": "Defines the tokenization strategy for the table. Options: 'Tapex Tokens ROW IDs Cells (RIC)', 'Tokens Rows Columns Cells (RCC)', or 'No special tokens (T0)'."},
         default="T0",
@@ -47,12 +40,11 @@ class ModelArguments:
         metadata={"help": "Specifies the type of structural embedding for rows and columns. Options: 'Row-Column Embedding (E1)' or 'No Structural Embedding (E0)'."},
         default="E0",
     )
+
     model_name_or_path: str = field(
         default=None, metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"},
     )
-    task: str = field(
-        default=None, metadata={"help": "Select automatically the best model for this task if no model_name_or_path given"},
-    )
+
     config_name: Optional[str] = field(
         default=None, metadata={"help": "Pretrained config name or path if not the same as model_name"}
     )
@@ -82,21 +74,17 @@ class ModelArguments:
                     "with private models)."
         },
     )
+    
+    tapas_path: str = field(
+        default="google/tapas-base",
+    )
 
 @dataclass
 class DataTrainingArguments:
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
-    training_type: str = field(
-        metadata={"help": "is inference ?."},
-        default=None,
-    )
-    
-    show_tokenization: Optional[bool] = field(
-        default=False, metadata={"help": "Show every tokenize tables."}
-    )
-    
+
     dataset_name: Optional[str] = field(
         default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
     )
@@ -136,31 +124,15 @@ class DataTrainingArguments:
     )
     
     max_target_length: Optional[int] = field(
-        default=82,
+        default=128,
         metadata={
             "help": "The maximum total sequence length for target text after tokenization. Sequences longer "
                     "than this will be truncated, sequences shorter will be padded."
         },
     )
 
-    max_query_length: Optional[int] = field(
-        default=31,
-        metadata={
-            "help": "The maximum total sequence length for target text after tokenization. Sequences longer "
-                    "than this will be truncated, sequences shorter will be padded."
-        },
-    )
-
-    max_labels_length: Optional[int] = field(
-        default=51,
-        metadata={
-            "help": "The maximum total sequence length for target text after tokenization. Sequences longer "
-                    "than this will be truncated, sequences shorter will be padded."
-        },
-    )
-    
     val_max_target_length: Optional[int] = field(
-        default=100,
+        default=128,
         metadata={
             "help": "The maximum total sequence length for validation target text after tokenization. Sequences longer "
                     "than this will be truncated, sequences shorter will be padded. Will default to `max_target_length`."
@@ -168,33 +140,13 @@ class DataTrainingArguments:
                     "during ``evaluate`` and ``predict``."
         },
     )
+
     pad_to_max_length: bool = field(
         default=False,
         metadata={
             "help": "Whether to pad all samples to model maximum sentence length. "
                     "If False, will pad the samples dynamically when batching to the maximum length in the batch. More "
                     "efficient on GPU but very bad for TPU."
-        },
-    )
-    max_train_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": "For debugging purposes or quicker training, truncate the number of training examples to this "
-                    "value if set."
-        },
-    )
-    max_eval_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": "For debugging purposes or quicker training, truncate the number of evaluation examples to this "
-                    "value if set."
-        },
-    )
-    max_predict_samples: Optional[int] = field(
-        default=None,
-        metadata={
-            "help": "For debugging purposes or quicker training, truncate the number of prediction examples to this "
-                    "value if set."
         },
     )
 

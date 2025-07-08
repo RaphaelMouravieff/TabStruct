@@ -22,9 +22,6 @@ from transformers.models.bart.modeling_bart import (
 )
 
 
-
-
-
 class TabStructDecoder(BartPreTrainedModel):
     """
     Transformer decoder consisting of *config.decoder_layers* layers. Each layer is a [`BartDecoderLayer`]
@@ -173,7 +170,6 @@ class TabStructDecoder(BartPreTrainedModel):
 
         # past_key_values_length
         past_key_values_length = past_key_values[0][0].shape[2] if past_key_values is not None else 0
-        #print('ici,past_key_values_length',past_key_values_length)
 
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input)

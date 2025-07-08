@@ -1,36 +1,29 @@
 
 
-from transformers import  set_seed
-from tabstruct.data_modules.data_collator import CustomDataCollatorForSeq2Seq
+from transformers import (DataCollatorForSeq2Seq, set_seed)
 
-from tabstruct.utils.logger import setup_logger
 from tabstruct.utils.show import show_example
 from tabstruct.utils.create_heatmaps import create_heatmaps
 
-from tabstruct.utils.args import  ModelArguments, DataTrainingArguments
 from tabstruct.utils.paths import  find_checkpoint
 
 from tabstruct.models.model_setup import load_config, load_tokenizer, load_model
 from tabstruct.data_modules.data_loader import load_inference_heat_map
 from tabstruct.data_modules.preprocessing import preprocess_datasets
 from tabstruct.metrics.base_metric import compute_metrics
-from tabstruct.bin.training import setup_trainer, run_evaluation, run_evaluation2
+from tabstruct.bin.training import setup_trainer, run_evaluation
 
 from functools import partial
 
 import os 
-from transformers import HfArgumentParser, Seq2SeqTrainingArguments
 from datasets import DatasetDict
-import sys
 import json
 import torch
 
-import os
+
 
 
 def main_inference_synthetic_data(model_args, data_args, training_args, logger):
-
-    
 
     if model_args.model_name_or_path is None and model_args.task:
         # Get the current script's absolute path and navigate up two levels
@@ -44,7 +37,6 @@ def main_inference_synthetic_data(model_args, data_args, training_args, logger):
             model_args.model_name_or_path = checkpoint_path
         else:
             logger.info("No valid checkpoint found. Check the task and encoding type.")
-
 
     set_seed(training_args.seed)
 
@@ -61,9 +53,7 @@ def main_inference_synthetic_data(model_args, data_args, training_args, logger):
     model = load_model(model_args, config, logger)
     model.to(device)
 
-
-
-    data_collator = CustomDataCollatorForSeq2Seq(
+    data_collator = DataCollatorForSeq2Seq(
         tokenizer,
         model=model,
         #padding=True if data_args.pad_to_max_length else "longest",
@@ -91,16 +81,11 @@ def main_inference_synthetic_data(model_args, data_args, training_args, logger):
             _, dataset_eval, _ = preprocess_datasets(dataset_eval, tokenizer, data_args, model_args, training_args, logger)
             
             if training_args.do_eval:
-                if model_args.question_in_decoder:
-                    logger.info("*** Evaluate for question in decoder***")
-                    history  = run_evaluation2(model, training_args, data_args, dataset_eval, tokenizer, data_collator, compute_metrics_)
 
-
-                if not model_args.question_in_decoder:
-                    logger.info("*** Evaluate***")
-                    trainer = setup_trainer(model, training_args, dataset_eval, dataset_eval, tokenizer, data_collator, compute_metrics_)
-                    run_evaluation(trainer, data_args, dataset_eval)
-                    history = trainer.state.log_history[0]
+                logger.info("*** Evaluate***")
+                trainer = setup_trainer(model, training_args, dataset_eval, dataset_eval, tokenizer, data_collator, compute_metrics_)
+                run_evaluation(trainer, data_args, dataset_eval)
+                history = trainer.state.log_history[0]
 
 
             logger.info(f"history : {history}")

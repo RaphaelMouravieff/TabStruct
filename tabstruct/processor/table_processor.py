@@ -1,3 +1,5 @@
+# code adapt from : https://github.com/microsoft/Table-Pretraining
+
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
@@ -19,15 +21,10 @@ class TableProcessor(object):
         """
         Preprocess a sentence into the expected format for model translate.
         """
-        # modify a table internally
 
         for truncate_func in self.table_truncate_funcs:
             truncate_func.truncate_table(table_content, question, answer)
-        # linearize a table into a string
-        #linear_table = self.table_linearize_func.process_table(table_content)
-        # concat question with linear_table
-        #joint_input = question + " " + linear_table
-        #return joint_input
+
 
         return table_content
     

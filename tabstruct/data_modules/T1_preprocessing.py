@@ -1,5 +1,5 @@
 import random
-from tabstruct.data_modules.preprocessing_utils import get_labels, show_all, reconstruct
+from tabstruct.data_modules.preprocessing_utils import get_labels
 import pandas as pd
 import copy
 
@@ -86,80 +86,56 @@ def add_special_tokens_T1(data_dict):
 
 
 
-def preprocess_tableqa_function_T1(examples, tokenizer, data_args, padding, table_processor, is_training=False, is_inference=False, question_in_decoder=False, logger=None):
+def preprocess_tableqa_function_T1(examples, tokenizer, data_args, padding, table_processor, is_training=False, logger=None):
 
+    pad_token_id = tokenizer.pad_token_id
 
 
     # Prepare output lists for batched inputs
-    token_types, input_ids_list, attention_masks, labels_list, decoder_input_ids_list, decoder_attention_mask_list = [], [], [], [], [], []
+    token_types, input_ids_list, attention_masks, labels_list = [], [], [], []
 
     # Iterate over the batch
     for example_table, query, answers in zip(examples["table"], examples["question"], examples["answers"]):
-        if data_args.show_tokenization:
-            example_ = copy.deepcopy({"table":example_table, "question":query, "answers":answers})
-
-        
+       
         query = query.lower()
-
-        if data_args.training_type == "pre-training-tokenize":
-            example_table, query = reconstruct(example_table)
 
         if data_args.is_wtq and is_training:
             logger.info('start truncating tables : FOR WTQ/WSQL and FOR TRAINING ONLY')
             example_table = table_processor.process_input(example_table, query, answers)
 
 
-
         # Process table
         table = add_special_tokens_T1(example_table)
-        input_ids, attention_mask, token_type, query_length = get_token_type_T1(table, query, tokenizer, question_in_decoder)
+        input_ids, attention_mask, token_type = get_token_type_T1(table, query, tokenizer)
 
         input_ids, attention_mask, token_type = padd_all_T1(input_ids, attention_mask, token_type, tokenizer, data_args, logger=None )
 
 
-        labels, decoder_input_ids, decoder_attention_mask =   get_labels(answers, query, query_length,  data_args, tokenizer, padding, tokenizer.pad_token_id, question_in_decoder, is_inference)
-        
-        if data_args.show_tokenization:
-            show_all(example_, input_ids, token_type, attention_mask, decoder_input_ids, decoder_attention_mask, labels, tokenizer, logger)
-
+        labels =   get_labels(answers, data_args, tokenizer, padding, pad_token_id)
+       
         token_types.append(token_type)
         input_ids_list.append(input_ids)
         attention_masks.append(attention_mask)
         labels_list.append(labels)
-        decoder_input_ids_list.append(decoder_input_ids)
 
     
 
-    if question_in_decoder is False:
-        return {
+    return {
         "token_type": token_types,
         "input_ids": input_ids_list,
         "attention_mask": attention_masks,
         "labels": labels_list,
     }
 
-    if question_in_decoder is True:
-        return {
-        "token_type": token_types,
-        "input_ids": input_ids_list,
-        "attention_mask": attention_masks,
-        "labels": labels_list,
-        "decoder_input_ids": decoder_input_ids_list,
-    }
 
 
 
-
-def get_token_type_T1(table, query, tokenizer, question_in_decoder):
+def get_token_type_T1(table, query, tokenizer):
     table = [table["header"]] + table["rows"]
 
-    if question_in_decoder is False:
-        query_ids = tokenizer(query).input_ids[:-1] 
-        query_length = len(query_ids)
-    if question_in_decoder is True:
-        query_length = 1
-        query_ids = [0]
-        
+    query_ids = tokenizer(query).input_ids[:-1] 
+    query_length = len(query_ids)
+
     tokens_per_cells = [tokenizer([f" {I}" for I in row]).input_ids for row in table]
 
     rows_ids = [0] * query_length
@@ -188,10 +164,6 @@ def get_token_type_T1(table, query, tokenizer, question_in_decoder):
 
     token_type.append(token_type[-1])
 
-    if question_in_decoder is True:
-        query_ids = tokenizer(query).input_ids[:-1] 
-        query_length = len(query_ids)
-
-    return input_ids, attention_mask, token_type, query_length
+    return input_ids, attention_mask, token_type
 
 

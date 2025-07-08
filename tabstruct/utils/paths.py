@@ -20,8 +20,6 @@ def find_checkpoint(base_path, encoding_type, task, logger=None):
         return None
     
 
-
-
 def get_max_checkpoint(model_args, logger):
     # get save results path : 
 

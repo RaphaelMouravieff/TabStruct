@@ -30,16 +30,17 @@ def preprocess_datasets(datasets, tokenizer, data_args, model_args, training_arg
     do_ = [training_args.do_train, training_args.do_eval, training_args.do_predict]
     modes = ['train', "validation", "test"]
 
-    is_inference = model_args.is_inference
+    is_training = model_args.task == "train"
 
     for _, (do, mode) in enumerate(zip(do_, modes)):
         if not do:
             output[mode] = None
             continue
 
-        is_training = mode == "train"
 
         logger.info(f'Is training ? {is_training}')
+
+
 
         preprocess_tableqa_function = partial(preprocess_func[model_args.input_token_structure],
                                                 tokenizer = tokenizer,
@@ -47,8 +48,6 @@ def preprocess_datasets(datasets, tokenizer, data_args, model_args, training_arg
                                                 padding=padding,
                                                 table_processor=TABLE_PROCESSOR,
                                                 is_training=is_training,
-                                                is_inference=is_inference,
-                                                question_in_decoder=model_args.question_in_decoder,
                                                 logger=logger)
         
         logger.info(f'Special tokens Rows Ids Columns ({model_args.input_token_structure}).')     

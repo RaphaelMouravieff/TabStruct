@@ -26,40 +26,25 @@ def load_config(data_args, model_args, logger ):
 
     model_args.ignore_mismatched_sizes = False
 
-    #assert data_args.max_source_length <= config.max_position_embeddings, \
-    #    f"max_source_length ({data_args.max_source_length}) must be less than or equal to max_position_embeddings ({config.max_position_embeddings})"
-
-    if data_args.max_source_length > config.max_position_embeddings:
-        print(f'max source length {data_args.max_source_length} > {config.max_position_embeddings} increse max position embedding ! weight will be init from scratch ')
-        config.max_position_embeddings = data_args.max_source_length
-        model_args.ignore_mismatched_sizes = True
-        
     tapasconfig =  TapasConfig()
-
-    if data_args.is_header:
-        tapasconfig.type_vocab_sizes[0] = 4
-        logger.info(f'Is Header activated segment embedding size :{tapasconfig.type_vocab_sizes[0]}')
-        
     config.type_vocab_sizes = tapasconfig.type_vocab_sizes 
 
     # config the model structure
-    print('model_args.mask_sparsity_level',model_args.mask_sparsity_level)
     config.tabular_structure_embedding = model_args.tabular_structure_embedding
     config.encoding_structure_bias = model_args.encoding_structure_bias
     config.positional_embedding = model_args.positional_embedding
     config.mask_number = int(model_args.mask_sparsity_level[-1])
-    config.mask_query_table = model_args.mask_query_table
     config.input_token_structure = model_args.input_token_structure
 
+    # hf models does not support other names than eager and sdpa for attention
     if model_args.attention_type == "flex": # need True False attention mask
-        config._attn_implementation = "eager" # To use FlexAttention
+        config._attn_implementation = "eager" # To use FlexAttention see: tabstruct/attention/flex_attention.py
         config.max_source_length = data_args.max_source_length
         logger.info(f"attention_type flex")
 
     if model_args.attention_type == "sdpa":
         config._attn_implementation = "sdpa" # To use StructAttention
         logger.info(f"attention_type sdpa")
-
 
     logger.info(f"config : {config}")
     logger.info(f"mask_number : {config.mask_number}")
@@ -96,7 +81,8 @@ def load_model(model_args, config, logger):
             ignore_mismatched_sizes=model_args.ignore_mismatched_sizes)
 
         logger.info(f'Loaded TabStruct from checkpoint: {model_args.model_name_or_path}')
-        if not model_args.is_inference  and not "checkpoint" in model_args.model_name_or_path.split('/')[-1]:
+        if model_args.task == "train" and not "checkpoint" in model_args.model_name_or_path.split('/')[-1]:
+            # load extra weights only if model_name_or_path is a pre-trained model 
             model = load_extra_weights(model, model_args, config, logger)
 
     logger.info('\n' * 5)
@@ -130,7 +116,6 @@ def load_extra_weights(model, model_args, config, logger):
 
     del model2
 
-   # model.config.max_length = 100
     return model
 
 

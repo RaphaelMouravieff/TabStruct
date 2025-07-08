@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+
 
 def create_heatmaps(results_inference, path):
     # Extract the size of the matrix

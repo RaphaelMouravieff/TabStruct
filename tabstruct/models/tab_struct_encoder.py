@@ -58,7 +58,6 @@ class TabStructEncoder(BartPreTrainedModel):
 
         self._use_sparse_mask = True if config.mask_number != 0 else False
         self.mask_number = config.mask_number
-        self.mask_query_table = config.mask_query_table
         self._use_flex_attention = config._attn_implementation == "eager"
 
         self.embed_positions = EmbeddingController(
@@ -126,7 +125,7 @@ class TabStructEncoder(BartPreTrainedModel):
                 attention_mask = block_mask
       
             elif self._use_sparse_mask:
-                attention_mask = generate_mask(token_type, attention_mask, self.mask_number, self.mask_query_table).unsqueeze(1)
+                attention_mask = generate_mask(token_type, attention_mask, self.mask_number).unsqueeze(1)
 
             else:
                 attention_mask = _prepare_4d_attention_mask(attention_mask, inputs_embeds.dtype)
