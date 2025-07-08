@@ -35,3 +35,16 @@ BibTeX entry.
 ## 📂 License
 
 MIT or Apache-2.0 (choose one)
+
+
+## 📥 Downloading Datasets
+
+To run the experiments, you first need to download the datasets provided in our [GitHub release](https://github.com/RaphaelMouravieff/TabStruct/releases/latest).
+
+You can either:
+- Download them manually from the [Releases page](https://github.com/RaphaelMouravieff/TabStruct/releases/latest)
+- Or run the script below:
+
+```bash
+bash scripts/download_data.sh
+````

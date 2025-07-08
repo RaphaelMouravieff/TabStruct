@@ -30,8 +30,7 @@ ollama_env/
 
 
 # Explicitly ignore these specific subfolders in data/
-data/train/*
-data/inference/*
+data/*
 *.zip
 *.arrow
 
