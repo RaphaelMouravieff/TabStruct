@@ -4,18 +4,11 @@ from datasets import load_dataset, load_from_disk
 def load_datasets(data_args, model_args, logger):
 
     if data_args.dataset_name is not None:
-        # Downloading and loading a dataset from the hub.
-        if data_args.dataset_name in ["wikitablequestions"] : 
-            datasets = load_dataset(data_args.dataset_name, data_args.dataset_config_name, cache_dir=model_args.cache_dir)
-            logger.info(f'Load dataset {data_args.dataset_name}')
 
-        else:
-            try:
-                logger.info(f"try load from disk ..")
-                datasets = load_from_disk(data_args.dataset_name)
-                logger.info(f"Load dataset From Disk PATH = {data_args.dataset_name}")
-            except:
-                pass
+        logger.info(f"try load from disk ..")
+        datasets = load_from_disk(data_args.dataset_name)
+        logger.info(f"Load dataset From Disk PATH = {data_args.dataset_name}")
+
     else:
         data_files = {}
         if data_args.train_file is not None:

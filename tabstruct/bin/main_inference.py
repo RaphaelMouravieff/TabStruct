@@ -20,11 +20,11 @@ def main_inference(model_args, data_args, training_args):
     check_parameters(model_args, data_args, training_args, logger)
 
 
-    if any([x in model_args.task for x in ["WTQ","WSQL"]]):
+    if model_args.task == "test_wikisql":
         logger.info(f"Start inference for real datasets")
         main_inference_real_data( model_args, data_args, training_args, logger)
 
-    else : 
+    if model_args.task == "test_synthetic":
         logger.info(f"Start inference for synthetic datasets")
         main_inference_synthetic_data( model_args, data_args, training_args, logger)
 

@@ -5,29 +5,30 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 BASE_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 echo "BASE_DIR: $BASE_DIR"
-tasks=("ALL")
+
 mapfile -t all_models < "$BASE_DIR/all_models.txt"
 
 generate_job() {
-  cat <<EOF > $BASE_DIR/jobs/train/$2/synthetic.sh
+  cat <<EOF > $BASE_DIR/jobs/train/$name/synthetic.sh
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --job-name=v$3
-#SBATCH --gpus-per-node=1
-#SBATCH --time=88:00:00
+#SBATCH --job-name=v$index
 #SBATCH --partition=hard
-#SBATCH --output=$BASE_DIR/jobs/train/$2/results/${tasks[$1]}.out
+#SBATCH --gpus-per-node=1
+#SBATCH --time=48:00:00
+#SBATCH --output=$BASE_DIR/jobs/train/$name/results/synthetic.out
 
 python $BASE_DIR/run.py \\
-  --encoding_type $2 \\
+  --task train \\
+  --encoding_type $name \\
   --model_name_or_path facebook/bart-base \\
   --config_name microsoft/tapex-base \\
   --tokenizer_name facebook/bart-base \\
   --do_train \\
   --do_eval \\
-  --train_file "$BASE_DIR/data/train/train_synthetic_tiny.json" \\
-  --validation_file "$BASE_DIR/data/train/valid_synthetic_tiny.json"  \\
-  --output_dir $BASE_DIR/models/$2/${tasks[$1]} \\
+  --train_file "$BASE_DIR/data/train/train_synthetic.json" \\
+  --validation_file "$BASE_DIR/data/train/valid_synthetic.json"  \\
+  --output_dir $BASE_DIR/models/$name/synthetic \\
   --per_device_train_batch_size 8 \\
   --gradient_accumulation_steps 1 \\
   --per_device_eval_batch_size 8 \\
@@ -43,7 +44,7 @@ python $BASE_DIR/run.py \\
   --max_steps 500000 \\
   --max_target_length 128 \\
   --max_source_length 512 \\
-  --logging_dir $BASE_DIR/logs/train/$2/${tasks[$1]} \\
+  --logging_dir $BASE_DIR/logs/train/$name/synthetic \\
   --logging_steps 50 \\
   --overwrite_output_dir 1 \\
   --overwrite_cache 1 \\
@@ -51,21 +52,19 @@ python $BASE_DIR/run.py \\
   --save_strategy steps \\
   --save_total_limit 1 \\
   --load_best_model_at_end 1 \\
-  --task train
 EOF
 }
 
-for task in "${tasks[@]}"; do
-  index=0
-  for name in "${all_models[@]}"; do
+index=0
+for name in "${all_models[@]}"; do
 
-    mkdir -p $BASE_DIR/jobs/train/$name/results
-    echo "Synthetic train job for: $name count: $index"
-    generate_job $task $name $index
+  mkdir -p $BASE_DIR/jobs/train/$name/results
+  echo "Synthetic train job for: $name count: $index"
+  generate_job $name $index
 
-    if [ "$1" == "true" ]; then
-      sbatch $BASE_DIR/jobs/train/$name/synthetic.sh
-    fi
-    ((index++))
-  done
+  if [ "$1" == "true" ]; then
+    sbatch $BASE_DIR/jobs/train/$name/synthetic.sh
+  fi
+  ((index++))
 done
+

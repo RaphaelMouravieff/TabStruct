@@ -19,9 +19,9 @@ generate_job() {
 #SBATCH --output=$BASE_DIR/jobs/test/$name/results/robustness.out
 
 python $BASE_DIR/run.py \\
+  --task test_synthetic \\
   --encoding_type $name \\
   --do_eval \\
-  --task test \\
   --config_name microsoft/tapex-base \\
   --tokenizer_name facebook/bart-base \\
   --dataset_name $BASE_DIR/data/test/robustness/ALL  \\
