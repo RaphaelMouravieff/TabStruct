@@ -29,14 +29,13 @@ ollama_env/
 
 
 
-# Explicitly ignore these specific subfolders in data/
+# Ignore all files in these folders
 data/*
-*.zip
-*.arrow
+jobs/*
 
-
-# Allow other files in data/ if needed
-!data/**/*.py
+# But keep folders visible in repo
+!data/.gitkeep
+!jobs/.gitkeep
 
 # ===============================
 # Checkpoints / Logs / Outputs
