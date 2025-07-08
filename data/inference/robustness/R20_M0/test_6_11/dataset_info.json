@@ -1,0 +1,35 @@
+{
+  "citation": "",
+  "description": "",
+  "features": {
+    "table": {
+      "header": {
+        "feature": {
+          "dtype": "string",
+          "_type": "Value"
+        },
+        "_type": "Sequence"
+      },
+      "rows": {
+        "feature": {
+          "feature": {
+            "dtype": "string",
+            "_type": "Value"
+          },
+          "_type": "Sequence"
+        },
+        "_type": "Sequence"
+      }
+    },
+    "question": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "answers": {
+      "dtype": "string",
+      "_type": "Value"
+    }
+  },
+  "homepage": "",
+  "license": ""
+}
