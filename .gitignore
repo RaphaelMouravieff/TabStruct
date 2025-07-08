@@ -1,0 +1,55 @@
+# ===============================
+# Python artifacts
+# ===============================
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+
+# ===============================
+# Jupyter notebooks
+# ===============================
+.ipynb_checkpoints/
+
+# ===============================
+# Environment files
+# ===============================
+.env
+*.env
+.venv/
+.ollama_env/
+ollama_env/
+
+# ===============================
+# VSCode / IDEs
+# ===============================
+.vscode/
+.idea/
+*.swp
+
+
+
+# Explicitly ignore these specific subfolders in data/
+data/train/*
+data/inference/*
+*.zip
+*.arrow
+
+
+# Allow other files in data/ if needed
+!data/**/*.py
+
+# ===============================
+# Checkpoints / Logs / Outputs
+# ===============================
+logs/
+*.log
+*.out
+*.pth
+*.ckpt
+
+
+# ===============================
+# Misc
+# ===============================
+.DS_Store
