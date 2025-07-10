@@ -37,11 +37,6 @@ def preprocess_datasets(datasets, tokenizer, data_args, model_args, training_arg
             output[mode] = None
             continue
 
-
-        logger.info(f'Is training ? {is_training}')
-
-
-
         preprocess_tableqa_function = partial(preprocess_func[model_args.input_token_structure],
                                                 tokenizer = tokenizer,
                                                 data_args=data_args,
@@ -49,9 +44,7 @@ def preprocess_datasets(datasets, tokenizer, data_args, model_args, training_arg
                                                 table_processor=TABLE_PROCESSOR,
                                                 is_training=is_training,
                                                 logger=logger)
-        
-        logger.info(f'Special tokens Rows Ids Columns ({model_args.input_token_structure}).')     
-    
+            
         output[mode] = datasets[mode].map(preprocess_tableqa_function,
                                         batched=True, 
                                        #batch_size=64, num_proc=os.cpu_count() // 2,

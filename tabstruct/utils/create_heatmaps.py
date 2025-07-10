@@ -3,9 +3,12 @@ import numpy as np
 
 
 def create_heatmaps(results_inference, path):
+    
+    idx = results_inference.keys()
+    
     # Extract the size of the matrix
-    min_idx = 4
-    max_idx = 12
+    min_idx = min([int(i.split('_')[1]) for i in idx])
+    max_idx = max([int(i.split('_')[1]) for i in idx])
     size = max_idx - min_idx + 1
 
     # Initialize matrices for accuracy and loss
@@ -33,10 +36,8 @@ def create_heatmaps(results_inference, path):
         plt.close()
 
 
-    filename = path.split('/')[-2]
-    # Create filenames for accuracy and loss heatmaps
-    accuracy_filename = f"{path}/{filename}_accuracy.png"
-    loss_filename = f"{path}/{filename}_loss.png"
+    accuracy_filename = f"{path}/accuracy.png"
+    loss_filename = f"{path}/loss.png"
 
     # Plot and save accuracy heatmap
     plot_heatmap(accuracy_matrix, "Accuracy Heatmap", accuracy_filename)

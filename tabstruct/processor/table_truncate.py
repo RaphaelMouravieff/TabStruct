@@ -172,6 +172,3 @@ class RowDeleteTruncate(TableTruncate):
             if _row_idx in drop_row_indices:
                 del table_content["rows"][_row_idx]
 
-        # only when the drop ratio is too large, logging for warning.
-        if "id" in table_content and len(drop_row_indices) > 0:
-            logger.warning("Delete {:.2f} rows in table {}".format(len(drop_row_indices), table_content["id"]))

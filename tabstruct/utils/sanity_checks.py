@@ -29,9 +29,6 @@ def check_parameters(model_args, data_args, training_args, logger):
             model_args.model_name_or_path = training_args.resume_from_checkpoint
             logger.info(f"model_name_or_path is None and  resume_from_checkpoint is not None setting model_name_or_path = resume_from_checkpoint")
 
-    data_args.is_wtq = any(keyword in data_args.dataset_name for keyword in ["robut", "wikitablequestions", "tiny_wtq", "wikisql"]) if data_args.dataset_name else False
-    
-    logger.info(f"is real data ? : {data_args.is_wtq}")
 
     assert model_args.input_token_structure in ["T0", "T1", "T2"], \
         "input_token_structure must be one of: 'T0', 'T1' or 'T2'"
@@ -70,11 +67,11 @@ def check_parameters(model_args, data_args, training_args, logger):
         assert model_args.encoding_structure_bias == "B0", \
             "encoding_structure_bias must be False when using 'flex' attention, as bias is not supported"
         
+    if model_args.model_name_or_path:
+        if "large" in model_args.model_name_or_path:
+            assert "large" in model_args.tapas_path, \
+                "When a large model is used, tapas_path should also be a large model"
 
-    if "large" in model_args.model_name_or_path:
-        assert "large" in model_args.tapas_path, \
-            "When a large model is used, tapas_path should also be a large model"
-
-    if "base" in model_args.model_name_or_path:
-        assert "base" in model_args.tapas_path, \
-            "When a base model is used, tapas_path should also be a base model"
+        if "base" in model_args.model_name_or_path:
+            assert "base" in model_args.tapas_path, \
+                "When a base model is used, tapas_path should also be a base model"

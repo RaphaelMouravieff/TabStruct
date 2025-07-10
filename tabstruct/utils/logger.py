@@ -1,4 +1,6 @@
 import logging
+logging.getLogger("datasets.fingerprint").setLevel(logging.ERROR)
+
 import sys
 from transformers.trainer_utils import is_main_process
 

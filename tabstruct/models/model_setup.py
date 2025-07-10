@@ -71,7 +71,7 @@ def load_model(model_args, config, logger):
 
 
     if model_args.model_name_or_path is None:
-        model = TabStructForConditionalGeneration(config=config, token=model_args.token)
+        model = TabStructForConditionalGeneration(config=config)
         logger.info('Loaded TabStruct from scratch')
         
     else: # init model using bart weight

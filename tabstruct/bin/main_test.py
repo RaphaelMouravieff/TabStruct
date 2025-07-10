@@ -12,6 +12,9 @@ from tabstruct.data_modules.data_loader import load_inference_heat_map
 from tabstruct.data_modules.preprocessing import preprocess_datasets
 from tabstruct.metrics.base_metric import compute_metrics
 from tabstruct.bin.training import setup_trainer, run_evaluation
+from tabstruct.utils.logger import setup_logger
+
+from tabstruct.utils.sanity_checks import check_parameters
 
 from functools import partial
 
@@ -23,16 +26,20 @@ import torch
 
 
 
-def main_inference_synthetic_data(model_args, data_args, training_args, logger):
+def main_test(model_args, data_args, training_args):
 
-    if model_args.model_name_or_path is None and model_args.task:
+    logger = setup_logger()
+    check_parameters(model_args, data_args, training_args, logger)
+    logger.info(f"Start inference for synthetic datasets")
+
+    if model_args.model_name_or_path is None :
         # Get the current script's absolute path and navigate up two levels
         current_path = os.path.abspath(__file__)
         base_path = os.path.dirname(os.path.dirname(os.path.dirname(current_path)))
 
         # Find the best checkpoint for the specified task and encoding type
 
-        checkpoint_path = find_checkpoint(base_path, model_args.encoding_type, model_args.task, logger)
+        checkpoint_path = find_checkpoint(base_path, model_args.encoding_type, logger)
         if checkpoint_path:
             model_args.model_name_or_path = checkpoint_path
         else:
@@ -69,8 +76,13 @@ def main_inference_synthetic_data(model_args, data_args, training_args, logger):
 
     datasets = load_inference_heat_map(data_args, logger)
     datasets.cleanup_cache_files()
-    for row in range(4, 12):
-        for col in range(4, 12):
+
+    idx = datasets.keys()
+    min_idx = min([int(i.split('_')[1]) for i in idx])
+    max_idx = max([int(i.split('_')[1]) for i in idx])
+
+    for row in range(min_idx, max_idx+1):
+        for col in range(min_idx, max_idx+1):
             dataset_name = f"test_{row}_{col}"
 
             dataset_eval = DatasetDict({"validation": datasets[dataset_name]})
@@ -96,27 +108,21 @@ def main_inference_synthetic_data(model_args, data_args, training_args, logger):
 
     
 
-    generalization = data_args.dataset_name.split('/')[-2]
+
+
     experience_name = data_args.dataset_name.split('/')[-1]
-    task = model_args.task
-
-    save_dir = f"../logs/results/{generalization}/{experience_name}"
-    filename = model_args.encoding_type
-    save_path = os.path.join(os.path.join(save_dir, filename), task)
+    save_dir = f"{base_path}/models/{model_args.encoding_type}/synthetic/results/{experience_name}"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
 
 
-    logger.info(f'filename : {filename}')
-    logger.info(f'save_path : {save_path}')
-    # Ensure the save path exists
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+    logger.info(f'save_path : {save_dir}')
 
-    with open(f"{save_path}/{filename}.json", 'w') as json_file:
+    with open(f"{save_dir}/results.json", 'w') as json_file:
         json.dump(results_inference, json_file)
 
 
-    create_heatmaps(results_inference, save_path)
-
+    create_heatmaps(results_inference, save_dir)
 
 
 

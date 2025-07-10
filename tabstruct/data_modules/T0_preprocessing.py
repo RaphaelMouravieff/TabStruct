@@ -66,8 +66,7 @@ def preprocess_tableqa_function_T0(examples, tokenizer, data_args, padding, tabl
 
         query = query.lower()
 
-        if data_args.is_wtq and is_training:
-            logger.info('start truncating tables : FOR WTQ/WSQL and FOR TRAINING ONLY')
+        if is_training:
             example_table = table_processor.process_input(example_table, query, answers)
 
         # Process table
