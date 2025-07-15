@@ -37,40 +37,57 @@ run.py       # Main controller script for experiments
 
 ## 🔧 Installation
 
+> 📌 **Reproducing results?** Just copy-paste this to get started with TabStruct.
 
 ```bash
+# Clone the repo
 git clone https://github.com/RaphaelMouravieff/TabStruct.git TabStruct
 cd TabStruct
+
+# Set up the environment
 conda create -n tabstruct python=3.11.11 -y
 conda activate tabstruct
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
 ## 📥 Data & Preprocessing
 
+📦 Step 1: Download all datasets used in the paper (WikiSQL, Synthetic)
 ```bash
 # Download all necessary datasets (WikiSQL, Synthetic)
 bash script/download_data.sh
+
+🧪 Step 2: Auto-generate all training & evaluation jobs (128 .sh scripts matching our experiments)
+After this, you can directly run any script to reproduce results from the paper.
+# Generate all train/test jobs for the 128 model variants
+bash script/generate_all_jobs.sh
 ```
 
 ## 🧪 Running Experiments
 
+🚂 Train on WikiSQL (single benchmark)
+Test is automatically included in the training script.
 ```bash
-# Generate all train/test jobs for the 128 model variants
-bash script/generate_all_jobs.sh
-
 # Train on WikiSQL
 bash jobs/train/{model_name}/wikisql.sh
+```
 
+🧬 Train on Synthetic Data (multi-benchmark setup)
+```bash
 # Train on synthetic data
 bash jobs/train/{model_name}/synthetic.sh
-
+```
+🧪 After training, run one or more generalization tests:
+```bash
 # Evaluate on compositional generalization
 bash jobs/test/{model_name}/compositional.sh
 
 # (Recommended) Run full synthetic tests: compositional, robustness, and structural
 bash jobs/test/{model_name}/synthetic.sh
 ```
+📄 See all valid {model_name} variants in: [all_models.txt](./all_models.txt)
 
 ## 🧬 Model Variants
 
