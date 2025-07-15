@@ -21,10 +21,8 @@ def load_datasets(data_args, model_args, logger):
             data_files["test"] = data_args.test_file
             extension = data_args.test_file.split(".")[-1]
         
-        if model_args!="PT":
-            datasets = load_dataset(extension, data_files=data_files, cache_dir=model_args.cache_dir)
-        if model_args=="PT":
-            datasets = load_from_disk(data_args.train_file)
+        datasets = load_dataset(extension, data_files=data_files, cache_dir=model_args.cache_dir)
+
 
     logger.info("datasets",datasets)    
     return datasets
@@ -38,3 +36,4 @@ def load_inference_heat_map(data_args, logger):
     logger.info("datasets",datasets)
     
     return datasets
+
