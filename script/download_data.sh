@@ -16,7 +16,7 @@ unzip -o data/wikisql_preprocessed.zip -d data/
 
 echo "📦 Downloading generalization evaluation datasets..."
 wget -O data/synthetic_generalization.zip https://github.com/RaphaelMouravieff/TabStruct/releases/download/v1.0/synthetic_generalization.zip
-unzip -o data/synthetic_generalization.zip -d data/test/
+unzip -o data/synthetic_generalization.zip -d data/
 
 echo "✅ All datasets downloaded and extracted."
 

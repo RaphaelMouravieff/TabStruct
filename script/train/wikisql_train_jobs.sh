@@ -22,6 +22,7 @@ python $BASE_DIR/run.py \\
   --model_name_or_path facebook/bart-base \\
   --do_train \\
   --do_eval \\
+  --do_predict \\
   --dataset_name $BASE_DIR/data/wikisql \\
   --output_dir $BASE_DIR/models/$name/wikisql \\
   --config_name microsoft/tapex-base \\

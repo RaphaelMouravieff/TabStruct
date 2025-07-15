@@ -19,19 +19,18 @@ generate_job() {
 #SBATCH --output=$BASE_DIR/jobs/test/$name/results/robustness.out
 
 python $BASE_DIR/run.py \\
-  --task test_synthetic \\
+  --task test \\
   --encoding_type $name \\
   --do_eval \\
   --config_name microsoft/tapex-base \\
   --tokenizer_name facebook/bart-base \\
-  --dataset_name $BASE_DIR/data/test/robustness/ALL  \\
-  --output_dir $BASE_DIR/models/$name/robustness/ALL \\
+  --dataset_name $BASE_DIR/data/test/robustness  \\
+  --output_dir $BASE_DIR/models/$name/synthetic/resuts/robustness \\
   --per_device_eval_batch_size 8 \\
-  --logging_dir $BASE_DIR/logs/test/robustness/ALL/$name \\
+  --logging_dir $BASE_DIR/logs/test/robustness/$name \\
   --logging_steps 50 \\
   --predict_with_generate \\
-  --pad_to_max_length 1 \\
-  --is_header 1
+  --pad_to_max_length 1 
 
 EOF
 }

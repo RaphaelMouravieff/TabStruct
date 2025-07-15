@@ -32,6 +32,7 @@ ollama_env/
 # Ignore all files in these folders
 data/*
 jobs/*
+models/*
 
 # But keep folders visible in repo
 !data/.gitkeep
