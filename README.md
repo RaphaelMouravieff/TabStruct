@@ -4,10 +4,10 @@
 [![ACL 2025](https://img.shields.io/badge/ACL-2025-blue.svg)](https://aclanthology.org/)  
 [![Stars](https://img.shields.io/github/stars/RaphaelMouravieff/TabStruct?style=social)](https://github.com/RaphaelMouravieff/TabStruct/stargazers)
 
-![TabStruct Overview](./figures/structural-deep-encoding-overview.png)
+![TabStruct Overview](./figures/main.png)
 
 
-🚀 **[Paper](https://arxiv.org/abs/2503.01457)** | 📘 **[Project Page](https://raphaelmouravieff.github.io/Structural-Deep-Encoding-for-Table-Question-Answering/)** | 🎥 **[Video Demo](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)**
+🚀 **[Paper](https://arxiv.org/abs/2503.01457es)** | 📘 **[Project Page](https://raphaelmouravieff.github.io/Structural-Deep-Encoding-for-Table-Question-Answering/)** | 🎥 **[Video Demo](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)**
 
 > TabStruct is a flexible and modular framework for exploring and evaluating structural encodings in Transformer-based table QA. It combines sparse attention, structural embeddings, and token formatting to build robust, scalable models for real and synthetic data.
 
