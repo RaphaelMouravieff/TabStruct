@@ -71,22 +71,24 @@ bash jobs/test/{model_name}/synthetic.sh
 ## 🧬 Model Variants
 
 Each model is defined by a unique combination of 5 structural components:
-	•	T: Token Structure (T0, T1, T2) - T0 = no special tokens, T2 = row+column+cell markers
-	•	E: Structural Embeddings (E0, E1) - E0 = no structure embeddings, E1 = row+column embeddings
-	•	PE: Positional Embedding (TPE, CPE) - PE = cell-level, TPE = standard Transformer position encoding
-	•	B: Attention Bias (B0, B1) - B0 = no attention bias, B1 = TableFormer-style relational bias
-	•	M: Sparse Attention Mask (M0–M6) — M0 = no sparsity
+
+- **T: Token Structure (T0, T1, T2)** – T0 = no special tokens, T2 = row+column+cell markers  
+- **E: Structural Embeddings (E0, E1)** – E0 = no structure embeddings, E1 = row+column embeddings  
+- **PE: Positional Embedding (TPE, CPE)** – PE = cell-level, TPE = standard Transformer position encoding  
+- **B: Attention Bias (B0, B1)** – B0 = no attention bias, B1 = TableFormer-style relational bias  
+- **M: Sparse Attention Mask (M0–M6)** – M0 = no sparsity
 
 
 Example:
 T2-M3-TPE-B1-E1
 
 This means:
-	•	Tokens: Row+Column+Cell tokens
-	•	Mask: Sparse mask M3 (ultra-efficient)
-	•	Positional Embedding: Table-wise (TPE)
-	•	Bias: Enabled
-	•	Structure Embedding: Row+Column Embedding
+
+- **Tokens**: Row+Column+Cell tokens  
+- **Mask**: Sparse mask M3 (ultra-efficient)  
+- **Positional Embedding**: Table-wise (TPE)  
+- **Bias**: Enabled  
+- **Structure Embedding**: Row+Column Embedding
 
 📄 See [all_models.txt](./all_models.txt) for the full list of 128 variants.
 📓 For a visual overview of how each component is applied during model generation, check out:
@@ -95,21 +97,9 @@ This means:
 
 ## 🎥 Demo & GitHub Pages
 
-📘 Project Page
-🎥 Watch the Demo
+📘 [Project Page](https://raphaelmouravieff.github.io/TabStruct/)
 
-
-⸻
-
-📈 Results & Benchmarks
-
-TabStruct achieves strong generalization and robustness across synthetic and real datasets.
-
-Model Variant	WikiSQL	Synthetic Avg	Speedup (M3)
-T2-M0-TPE-B1-E1	78.5%	79.3%	1×
-T2-M3-TPE-B1-E1	80.3%	79.4%	50×
-TAPEX (baseline)	74.7%	79.5%	N/A
-TableFormer (baseline)	60.5%	23.1%	N/A
+🎥 [Video Demo](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
 
 
 ⸻
@@ -126,35 +116,39 @@ bash jobs/test/T2-M3-TPE-B1-E1/synthetic.sh
 
 ⸻
 
-📊 Datasets & Licenses
+## 📊 **Datasets & Licenses**
 
 This project uses the following datasets:
-	•	WikiSQL (Zhong et al., 2017)
-→ We include a preprocessed version
-→ License: BSD 3-Clause
-→ See LICENSE.wikisql for full terms
-	•	Synthetic Data
-→ Fully auto-generated, no human annotation involved
-	•	WikiTableQuestions (WTQ)
-→ Downloaded externally using the provided script
+
+- **WikiSQL** (Zhong et al., 2017)  
+  → We include a preprocessed version  
+  → License: BSD 3-Clause  
+  → See `LICENSE.wikisql` for full terms
+
+- **Synthetic Data**  
+  → Fully auto-generated, no human annotation involved
+
+- **WikiTableQuestions (WTQ)**  
+  → Downloaded externally using the provided script
 
 ⸻
 
-📜 Citation
+## 📜 **Citation**
 
 If you use TabStruct in your research, please cite us:
 
+```bibtex
 @inproceedings{mouravieff2025tabstruct,
   title     = {Structural Deep Encoding for Table Question Answering},
   author    = {Raphael Mouravieff and others},
   booktitle = {Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (ACL)},
   year      = {2025}
 }
-
+```
 
 ⸻
 
-📂 License
+## 📂 License
 
 This repository is licensed under the MIT License.
 
