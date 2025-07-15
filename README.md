@@ -91,29 +91,35 @@ bash jobs/test/{model_name}/synthetic.sh
 
 ## 🧬 Model Variants
 
-Each model is defined by a unique combination of 5 structural components:
+Each TabStruct model is defined by a unique combination of **5 structural components**, forming a name like:
+```
+T{0/1/2}-M{0–6}-{CPE/TPE}-B{0/1}-E{0/1}
+```
 
-- **T: Token Structure (T0, T1, T2)** – T0 = no special tokens, T2 = row+column+cell markers  
-- **E: Structural Embeddings (E0, E1)** – E0 = no structure embeddings, E1 = row+column embeddings  
-- **PE: Positional Embedding (TPE, CPE)** – PE = cell-level, TPE = standard Transformer position encoding  
-- **B: Attention Bias (B0, B1)** – B0 = no attention bias, B1 = TableFormer-style relational bias  
-- **M: Sparse Attention Mask (M0–M6)** – M0 = no sparsity
+| Component | Meaning                   | Example Values                                  |
+|----------|---------------------------|-------------------------------------------------|
+| **T**    | Token Structure            | `T0` = no tokens, `T2` = row+column+cell markers |
+| **M**    | Sparse Attention Mask      | `M0` = no sparsity, `M3` = ultra-efficient mask |
+| **PE**   | Positional Embedding       | `CPE` = cell-level, `TPE` = table-wise encoding |
+| **B**    | Attention Bias             | `B0` = no bias, `B1` = TableFormer-style bias      |
+| **E**    | Structural Embeddings      | `E0` = no structure embeddings, `E1` = row+column embeddings       |
 
+---
 
-Example:
-T2-M3-TPE-B1-E1
+### 🔍 Example Variant: `T2-M3-TPE-B1-E1`
 
-This means:
+This configuration means:
 
-- **Tokens**: Row+Column+Cell tokens  
-- **Mask**: Sparse mask M3 (ultra-efficient)  
-- **Positional Embedding**: Table-wise (TPE)  
-- **Bias**: Enabled  
-- **Structure Embedding**: Row+Column Embedding
+- **Tokens**: Row+Column+Cell markers  
+- **Mask**: Sparse attention (`M3`, ultra-efficient)  
+- **Positional Embedding**: Table-wise (`TPE`)  
+- **Bias**: Enabled (TableFormer-style)  
+- **Structural Embedding**: Row+Column
 
-📄 See [all_models.txt](./all_models.txt) for the full list of 128 variants.
-📓 For a visual overview of how each component is applied during model generation, check out:
-[Project_Overview.ipynb](./Notebooks/Project_Overview.ipynb)
+---
+
+📄 View all 128 model configurations in [all_models.txt](./all_models.txt)  
+📓 For a visual breakdown of each structural component, see [Project_Overview.ipynb](./Notebooks/Project_Overview.ipynb)
 
 
 ## 🎥 Demo & GitHub Pages
