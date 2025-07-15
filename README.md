@@ -4,7 +4,10 @@
 [![ACL 2025](https://img.shields.io/badge/ACL-2025-blue.svg)](https://aclanthology.org/)  
 [![Stars](https://img.shields.io/github/stars/RaphaelMouravieff/TabStruct?style=social)](https://github.com/RaphaelMouravieff/TabStruct/stargazers)
 
-🚀 **[Paper](https://arxiv.org/abs/XXXX.YYYY)** | 📘 **[Project Page](https://raphaelmouravieff.github.io/TabStruct/)** | 🎥 **[Video Demo](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)**
+![TabStruct Overview](./figures/structural-deep-encoding-overview.png)
+
+
+🚀 **[Paper](https://arxiv.org/abs/2503.01457)** | 📘 **[Project Page](https://raphaelmouravieff.github.io/Structural-Deep-Encoding-for-Table-Question-Answering/)** | 🎥 **[Video Demo](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)**
 
 > TabStruct is a flexible and modular framework for exploring and evaluating structural encodings in Transformer-based table QA. It combines sparse attention, structural embeddings, and token formatting to build robust, scalable models for real and synthetic data.
 
@@ -33,6 +36,7 @@ run.py       # Main controller script for experiments
 ---
 
 ## 🔧 Installation
+
 
 ```bash
 git clone https://github.com/RaphaelMouravieff/TabStruct.git TabStruct
@@ -97,7 +101,7 @@ This means:
 
 ## 🎥 Demo & GitHub Pages
 
-📘 [Project Page](https://raphaelmouravieff.github.io/TabStruct/)
+📘 [Project Page](https://raphaelmouravieff.github.io/Structural-Deep-Encoding-for-Table-Question-Answering/)
 
 🎥 [Video Demo](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
 
@@ -116,33 +120,16 @@ bash jobs/test/T2-M3-TPE-B1-E1/synthetic.sh
 
 ⸻
 
-## 📊 **Datasets & Licenses**
-
-This project uses the following datasets:
-
-- **WikiSQL** (Zhong et al., 2017)  
-  → We include a preprocessed version  
-  → License: BSD 3-Clause  
-  → See `LICENSE.wikisql` for full terms
-
-- **Synthetic Data**  
-  → Fully auto-generated, no human annotation involved
-
-- **WikiTableQuestions (WTQ)**  
-  → Downloaded externally using the provided script
-
-⸻
-
 ## 📜 **Citation**
 
 If you use TabStruct in your research, please cite us:
 
 ```bibtex
-@inproceedings{mouravieff2025tabstruct,
-  title     = {Structural Deep Encoding for Table Question Answering},
-  author    = {Raphael Mouravieff and others},
-  booktitle = {Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (ACL)},
-  year      = {2025}
+@article{mouravieff2025structural,
+  title={Structural Deep Encoding for Table Question Answering},
+  author={Mouravieff, Rapha{\"e}l and Piwowarski, Benjamin and Lamprier, Sylvain},
+  journal={arXiv preprint arXiv:2503.01457},
+  year={2025}
 }
 ```
 
@@ -155,3 +142,14 @@ This repository is licensed under the MIT License.
 Portions of the data are adapted from the WikiSQL dataset by Salesforce.com, Inc.,
 which is licensed under the BSD 3-Clause License.
 
+
+
+This project uses the following datasets:
+
+- **WikiSQL** (Zhong et al., 2017)  
+  → We include a preprocessed version  
+  → License: BSD 3-Clause  
+  → See `LICENSE.wikisql` for full terms
+
+- **Synthetic Data**  
+  → Fully auto-generated
