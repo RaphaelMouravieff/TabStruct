@@ -16,7 +16,7 @@ class ModelArguments:
     )
 
     attention_type: str = field(
-        metadata={"help": "sdpa or flex"},
+        metadata={"help": "sdpa"},
         default="sdpa",
     )
 

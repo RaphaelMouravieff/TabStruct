@@ -58,7 +58,6 @@ class TabStructEncoder(BartPreTrainedModel):
 
         self._use_sparse_mask = True if config.mask_number != 0 else False
         self.mask_number = config.mask_number
-        self._use_flex_attention = config._attn_implementation == "eager"
 
         self.embed_positions = EmbeddingController(
             config
@@ -81,7 +80,6 @@ class TabStructEncoder(BartPreTrainedModel):
         self,
         input_ids: torch.LongTensor = None,
         attention_mask: Optional[torch.Tensor] = None,
-        block_mask = None,
         token_type: torch.LongTensor = None,
         head_mask: Optional[torch.Tensor] = None,
         inputs_embeds: Optional[torch.FloatTensor] = None,
@@ -121,10 +119,8 @@ class TabStructEncoder(BartPreTrainedModel):
         # expand attention_mask
         if attention_mask is not None:
 
-            if self._use_flex_attention:  
-                attention_mask = block_mask
-      
-            elif self._use_sparse_mask:
+   
+            if self._use_sparse_mask:
                 attention_mask = generate_mask(token_type, attention_mask, self.mask_number).unsqueeze(1)
 
             else:

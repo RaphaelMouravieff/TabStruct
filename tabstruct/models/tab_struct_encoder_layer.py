@@ -8,12 +8,10 @@ from torch import nn
 from transformers import BartConfig
 from transformers.models.bart.modeling_bart import ACT2FN
 
-from tabstruct.attention.flex_attention import FlexAttention
 from tabstruct.attention.struct_attention import StructAttention
 
 
 BART_ATTENTION_CLASSES = {
-    "eager": FlexAttention,
     "sdpa": StructAttention,
 }
 

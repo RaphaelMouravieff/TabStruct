@@ -23,7 +23,6 @@ from tabstruct.models.tab_struct_encoder import TabStructEncoder
 from tabstruct.models.tab_struct_decoder import TabStructDecoder
 
 
-from torch.nn.attention.flex_attention import create_block_mask, or_masks
 
 class TabStructModel(BartPreTrainedModel):
     _tied_weights_keys = ["encoder.embed_tokens.weight", "decoder.embed_tokens.weight"]
@@ -32,7 +31,6 @@ class TabStructModel(BartPreTrainedModel):
         super().__init__(config)
 
         padding_idx, vocab_size = config.pad_token_id, config.vocab_size
-        self._use_flex_attention = config._attn_implementation == "eager"
         self.shared = nn.Embedding(vocab_size, config.d_model, padding_idx)
 
         self.encoder = TabStructEncoder(config, self.shared)
@@ -96,7 +94,6 @@ class TabStructModel(BartPreTrainedModel):
             )
 
 
-
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
             output_hidden_states if output_hidden_states is not None else self.config.output_hidden_states
@@ -104,40 +101,11 @@ class TabStructModel(BartPreTrainedModel):
         use_cache = use_cache if use_cache is not None else self.config.use_cache
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        if self._use_flex_attention:  
-            
-            Row_id = token_type[:, :, 2]
-
-            def Row_mask(b, h, q_idx, kv_idx):
-                return Row_id[b][q_idx] == Row_id[b][kv_idx] 
-
-            is_prefix = (token_type[:, :, 0] == 0).int()  # shape: (bs, seq_len)
-
-            PREFIX_LENGTH = is_prefix.sum(dim=1)  # shape: (bs,)
-
-       
-            def query_mask(b, h, q_idx, kv_idx):
-                prefix_mask = kv_idx <= PREFIX_LENGTH[b]
-                prefix_mask1 = q_idx <= PREFIX_LENGTH[b]
-                return prefix_mask | prefix_mask1 
-
-            both = or_masks(query_mask, Row_mask)
-
-            seq_length = self.config.max_source_length
-            bs = input_ids.shape[0]
-            block_mask =  create_block_mask(both, bs, 1, seq_length, seq_length)
-
-        else:
-            block_mask = None
-
-
-
 
         if encoder_outputs is None:
             encoder_outputs = self.encoder(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
-                block_mask=block_mask,
                 token_type=token_type,
                 head_mask=head_mask,
                 inputs_embeds=inputs_embeds,
@@ -145,7 +113,7 @@ class TabStructModel(BartPreTrainedModel):
                 output_hidden_states=output_hidden_states,
                 return_dict=return_dict,
             )
-        # If the user passed a tuple for encoder_outputs, we wrap it in a BaseModelOutput when return_dict=True
+
         elif return_dict and not isinstance(encoder_outputs, BaseModelOutput):
             encoder_outputs = BaseModelOutput(
                 last_hidden_state=encoder_outputs[0],
@@ -153,9 +121,7 @@ class TabStructModel(BartPreTrainedModel):
                 attentions=encoder_outputs[2] if len(encoder_outputs) > 2 else None,
             )
 
-        #print('decoder_attention_mask2',decoder_attention_mask)
 
-        # decoder outputs consists of (dec_features, past_key_value, dec_hidden, dec_attn)
         decoder_outputs = self.decoder(
             input_ids=decoder_input_ids,
             attention_mask=decoder_attention_mask,

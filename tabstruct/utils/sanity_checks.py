@@ -58,14 +58,8 @@ def check_parameters(model_args, data_args, training_args, logger):
     if model_args.attention_type == "flash":
         raise NotImplementedError("Flash attention is not supported at the moment.")
 
-    assert model_args.attention_type in ["flex", "sdpa"], \
-        f"model_args.attention_type must be either 'flex' or 'sdpa', but got {model_args.attention_type}"
-
-    if model_args.attention_type == "flex":
-        assert model_args.mask_sparsity_level == "M3", \
-            "When attention_type is 'flex', mask_sparsity_level must be 'M3'."
-        assert model_args.encoding_structure_bias == "B0", \
-            "encoding_structure_bias must be False when using 'flex' attention, as bias is not supported"
+    assert model_args.attention_type == "sdpa", \
+        f"model_args.attention_type must be 'sdpa', but got {model_args.attention_type}"
         
     if model_args.model_name_or_path:
         if "large" in model_args.model_name_or_path:

@@ -58,7 +58,7 @@ def main_train(model_args, data_args, training_args):
 
     if training_args.do_predict:
         logger.info("*** Predict ***")
-        run_prediction(trainer, tokenizer, data_args, predict_dataset, training_args)
+        run_prediction(trainer, data_args, predict_dataset)
 
     return trainer.state.log_history
 

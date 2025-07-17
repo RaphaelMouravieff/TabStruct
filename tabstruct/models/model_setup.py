@@ -36,15 +36,9 @@ def load_config(data_args, model_args, logger ):
     config.mask_number = int(model_args.mask_sparsity_level[-1])
     config.input_token_structure = model_args.input_token_structure
 
-    # hf models does not support other names than eager and sdpa for attention
-    if model_args.attention_type == "flex": # need True False attention mask
-        config._attn_implementation = "eager" # To use FlexAttention see: tabstruct/attention/flex_attention.py
-        config.max_source_length = data_args.max_source_length
-        logger.info(f"attention_type flex")
 
-    if model_args.attention_type == "sdpa":
-        config._attn_implementation = "sdpa" # To use StructAttention
-        logger.info(f"attention_type sdpa")
+    config._attn_implementation = "sdpa" # To use StructAttention
+    logger.info(f"attention_type sdpa")
 
     logger.info(f"config : {config}")
     logger.info(f"mask_number : {config.mask_number}")

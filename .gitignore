@@ -36,6 +36,9 @@ data/*
 jobs/*
 models/*
 
+# Ignore everything inside the utils/
+utils/
+
 # But keep folders visible in repo
 !data/.gitkeep
 !jobs/.gitkeep
